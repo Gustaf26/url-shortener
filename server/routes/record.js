@@ -10,73 +10,58 @@ const recordRoutes = express.Router();
 // This will help us connect to the database
 const dbo = require("../db/conn");
 
-// This help convert the id from string to ObjectId for the _id.
-const ObjectId = require("mongodb").ObjectId;
-
 // This section will help you insert a new route.
 recordRoutes.route("/record").post(function (req, res) {
-  let db_connect = dbo.getDb();
-  let result = db_connect.collection("shortened").insertOne({
-    _id: shortId.generate(),
-    url: req.body.originalurl,
-    redirecturl: "localhost:5000/" + crypto.randomBytes(4).toString("hex"),
-  });
-  if (result) return res.json("You have succesfully created a random url");
-});
+  let long_url = req.body.url;
 
-// This section will help you get a single record by id
-recordRoutes.route("/record/:id").get(function (req, res) {
-  let db_connect = dbo.getDb();
-  let myquery = { _id: ObjectId(req.params.id) };
-  db_connect.collection("records").findOne(myquery, function (err, result) {
-    if (err) throw err;
-    res.json(result);
-  });
-});
-
-// This section will help you create a new record.
-recordRoutes.route("/record/add").post(function (req, response) {
-  let db_connect = dbo.getDb();
-  let myobj = {
-    name: req.body.name,
-    position: req.body.position,
-    level: req.body.level,
-  };
-  db_connect.collection("records").insertOne(myobj, function (err, res) {
-    if (err) throw err;
-    response.json(res);
-  });
-});
-
-// This section will help you update a record by id.
-recordRoutes.route("/update/:id").post(function (req, response) {
-  let db_connect = dbo.getDb();
-  let myquery = { _id: ObjectId(req.params.id) };
-  let newvalues = {
-    $set: {
-      name: req.body.name,
-      position: req.body.position,
-      level: req.body.level,
-    },
-  };
-  db_connect
-    .collection("records")
-    .updateOne(myquery, newvalues, function (err, res) {
-      if (err) throw err;
-      console.log("1 document updated");
-      response.json(res);
+  // Logic for empty urls from request body (not allowed)
+  if (long_url === "") {
+    res.status(400).json({
+      error: "Input cannot be empty",
     });
-});
+    return;
+  }
 
-// This section will help you delete a record
-recordRoutes.route("/:id").delete((req, response) => {
-  let db_connect = dbo.getDb();
-  let myquery = { _id: ObjectId(req.params.id) };
-  db_connect.collection("records").deleteOne(myquery, function (err, obj) {
-    if (err) throw err;
-    console.log("1 document deleted");
-    response.json(obj);
+  // Logic for validating the length of the same url
+  if (long_url.length > 1000) {
+    res.status(400).json({
+      error: "Input is too long",
+    });
+    return;
+  }
+
+  // Logic for checking if url invalid characters are present
+  let invalidChars = ["<", ">", "#", "%", '"', "'"];
+  let invalidCharPresent = false;
+  invalidChars.map((char) => {
+    long_url.includes(char) ? (invalidCharPresent = true) : null;
   });
+
+  if (invalidCharPresent) {
+    res.status(400).json({
+      error:
+        "Input must have valid characters. These are not allowed: '<' | '>' | '#' | '%' | '\"' | \"'\"",
+    });
+    return;
+  }
+
+  // If none of the above, move on to register in db a new record
+
+  // These variables will serve for the time limit (10 mins) in case that option is active
+  // in the request
+  let actualTime = new Date();
+  let timeLimit = new Date(actualTime.getTime() + 600000);
+
+  let newRecord = {
+    _id: shortId.generate(),
+    redirecturl: long_url,
+    shortenedurl: "localhost:5000/" + crypto.randomBytes(4).toString("hex"),
+    timelimit: req.body.time_limit ? timeLimit : null,
+  };
+
+  let db_connect = dbo.getDb();
+  let result = db_connect.collection("shortened").insertOne(newRecord);
+  if (result) return res.json(newRecord);
 });
 
 module.exports = recordRoutes;
