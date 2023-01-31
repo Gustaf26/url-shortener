@@ -7,7 +7,10 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import UrlsForm from "./components/UrlsForm";
 
-// In order to run this app (the frontend) you need to run "npm start" in the terminal
+// In order to run this app (the frontend) you need to install the dependencies with npm install
+// in this folder
+
+// Once that is done, just run the app writing "npm start" in the terminal
 function App() {
   const [urlsList, setUrlsList] = useState([]);
   const [limitedUrls, setLimitedUrls] = useState([]);
