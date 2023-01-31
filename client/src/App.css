@@ -2,6 +2,8 @@
   text-align: center;
 }
 
+/* Main styles and animation on header */
+
 .App-logo {
   height: 10vh;
   pointer-events: none;
@@ -28,9 +30,11 @@
   color: white;
 }
 
+/* Form styles */
+
 #my-urls-container {
   width: 50vw;
-  height: 80vh;
+  height: 60vh;
   display: flex;
   align-items: center;
 }
@@ -41,9 +45,30 @@
 
 #my-urls-form {
   width: 100%;
-  height: 50%;
+  height: 40%;
 }
 
 .form-check-label {
   margin-left: 8px;
+}
+
+/* URL Containers */
+
+#unlimited-container {
+  width: 50%;
+  margin: 0 auto;
+  background-color: #8999b4;
+  color: rgb(32, 48, 68);
+  padding: 0.5rem;
+  margin: 1rem auto;
+  border-radius: 10px;
+}
+
+#limited-container {
+  width: 50%;
+  margin: 1rem auto;
+  background-color: #343a44;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 10px;
 }

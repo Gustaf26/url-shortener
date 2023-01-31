@@ -47,10 +47,9 @@ recordRoutes.route("/record").post(function (req, res) {
 
   // If none of the above, move on to register in db a new record
 
-  // These variables will serve for the time limit (10 mins) in case that option is active
-  // in the request
-  let actualTime = new Date();
-  let timeLimit = new Date(actualTime.getTime() + 600000);
+  // These variables will serve for the time limit (1 min) in case that option is active in the request
+
+  let timeLimit = 60000;
 
   let newRecord = {
     _id: shortId.generate(),
